@@ -1,0 +1,151 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>demo.pom</groupId>
+    <artifactId>swaglabs-pagefactory-allure</artifactId>
+    <version>1.0.0</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Java -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+
+        <!-- =========================
+             Versions (Keep consistent)
+             ========================= -->
+
+        <!-- ✅ OPTION A (Recommended): Upgrade Selenium to a newer version that supports Chrome 143 better
+             If you face any dependency issue, revert back to 4.23.1 -->
+        <selenium.version>4.27.0</selenium.version>
+
+        <testng.version>7.9.0</testng.version>
+        <allure.version>2.29.1</allure.version>
+        <aspectj.version>1.9.22.1</aspectj.version>
+
+        <extentreports.version>5.1.1</extentreports.version>
+        <surefire.version>3.2.5</surefire.version>
+
+        <!-- Allure results path -->
+        <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+    </properties>
+
+    <dependencies>
+
+        <!-- Selenium -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- ✅ OPTION B (Only if available for your Selenium version):
+             Add DevTools module to remove "Unable to find CDP implementation..."
+             If Maven gives "artifact not found", REMOVE this dependency. -->
+        <!--
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-devtools-v143</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+        -->
+
+        <!-- TestNG -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Extent Reports -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extentreports.version}</version>
+        </dependency>
+
+        <!-- Allure TestNG Adapter -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- AspectJ Weaver -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectj.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Your custom/local dependency (keep ONLY if needed) -->
+        <dependency>
+            <groupId>Demo1234</groupId>
+            <artifactId>Demo1234</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <!-- Compiler -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+
+            <!-- Surefire: Run TestNG + generate Allure results -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <configuration>
+
+                    <!-- Run via your testng.xml -->
+                    <suiteXmlFiles>
+                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+
+                    <!-- Allure results folder -->
+                    <systemPropertyVariables>
+                        <allure.results.directory>${allure.results.directory}</allure.results.directory>
+                    </systemPropertyVariables>
+
+                    <!-- ✅ Proper AspectJ Agent attach -->
+                    <argLine>
+                        -javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar
+                    </argLine>
+
+                    <!-- Improves stability -->
+                    <testFailureIgnore>false</testFailureIgnore>
+                </configuration>
+            </plugin>
+
+            <!-- Allure Report generation using Maven -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>2.12.0</version>
+                <configuration>
+                    <resultsDirectory>${allure.results.directory}</resultsDirectory>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
